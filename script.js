@@ -6,6 +6,7 @@ const searchInput = document.querySelector("#search-input");
 const notesList = document.querySelector("#notes-list");
 const noteCount = document.querySelector("#note-count");
 const errorMessage = document.querySelector("#error-message");
+const clearAllBtn = document.querySelector("#clear-all-btn");
 
 // Notes Data Array
 let notes = [];
@@ -40,6 +41,18 @@ function deleteNote(id) {
   notes = notes.filter((note) => note.id !== id);
   saveNotes();
   render(searchInput.value);
+}
+
+// Clear All Notes with Confirmation (Bonus Feature)
+function clearAllNotes() {
+  if (notes.length === 0) return;
+
+  const confirmed = confirm("Delete all notes?");
+  if (confirmed) {
+    notes = [];
+    saveNotes();
+    render();
+  }
 }
 
 // Render Notes to DOM
@@ -129,6 +142,9 @@ noteForm.addEventListener("submit", (e) => {
 searchInput.addEventListener("input", (e) => {
   render(e.target.value);
 });
+
+// Clear All Button Listener
+clearAllBtn.addEventListener("click", clearAllNotes);
 
 // App Initialization
 document.addEventListener("DOMContentLoaded", loadNotes);
