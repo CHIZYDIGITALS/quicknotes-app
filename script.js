@@ -2,12 +2,27 @@
 const noteForm = document.querySelector("#note-form");
 const noteInput = document.querySelector("#note-input");
 const noteCategory = document.querySelector("#note-category");
+const searchInput = document.querySelector("#search-input");
 const notesList = document.querySelector("#notes-list");
 const noteCount = document.querySelector("#note-count");
 const errorMessage = document.querySelector("#error-message");
 
 // Notes Data Array
 let notes = [];
+
+// Load Notes from localStorage on App Load
+function loadNotes() {
+  const stored = localStorage.getItem("quicknotes_data");
+  if (stored) {
+    notes = JSON.parse(stored);
+  }
+  render();
+}
+
+// Save Notes to localStorage
+function saveNotes() {
+  localStorage.setItem("quicknotes_data", JSON.stringify(notes));
+}
 
 // Update Note Counter Display
 function updateCount(count) {
@@ -23,15 +38,30 @@ function updateCount(count) {
 // Delete Individual Note
 function deleteNote(id) {
   notes = notes.filter((note) => note.id !== id);
-  render();
+  saveNotes();
+  render(searchInput.value);
 }
 
 // Render Notes to DOM
-function render() {
+function render(searchTerm = "") {
   notesList.textContent = "";
+
+  const filteredNotes = notes.filter((note) =>
+    note.text.toLowerCase().includes(searchTerm.toLowerCase().trim()),
+  );
+
   updateCount(notes.length);
 
-  notes.forEach((note) => {
+  if (filteredNotes.length === 0 && searchTerm.trim() !== "") {
+    const noResultsLi = document.createElement("li");
+    noResultsLi.style.color = "#6b7280";
+    noResultsLi.style.padding = "1rem 0";
+    noResultsLi.textContent = "No notes match your search.";
+    notesList.appendChild(noResultsLi);
+    return;
+  }
+
+  filteredNotes.forEach((note) => {
     const li = document.createElement("li");
     li.className = `note-card category-${note.category.toLowerCase()}`;
 
@@ -90,6 +120,15 @@ noteForm.addEventListener("submit", (e) => {
   };
 
   notes.unshift(newNote);
-  render();
+  saveNotes();
+  render(searchInput.value);
   noteInput.value = "";
 });
+
+// Search Input Listener
+searchInput.addEventListener("input", (e) => {
+  render(e.target.value);
+});
+
+// App Initialization
+document.addEventListener("DOMContentLoaded", loadNotes);
